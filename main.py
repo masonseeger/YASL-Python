@@ -14,18 +14,20 @@ def main():
     line = 1
     pos = 0
     user_input = input()
-    SC = Scanner(user_input, line)
+    SC = Scanner(user_input + '~', line)
 
     while True:
         if SC.state == -1:
             break
 
-        current_token = Token(SC.next())
+        token = SC.next()
 
         while(SC.state>=0):
-            print(current_token.information())
-            pos = len(current_token.lexeme)
-            current_token = Token(SC.next())
+            if SC.user_input == '~':
+                break
+            print(token.information())
+            pos = len(token.lexeme)
+            token = SC.next()
 
         line +=1
         user_input = input()
