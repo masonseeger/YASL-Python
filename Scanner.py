@@ -3,7 +3,7 @@ Created: 9/1/2018
 By: Mason Seeger
 
 Scanner class takes in line(s) of strings and returns tokens until the string is
-empty or a EOF token is found.
+"empty" (has a ~ at the end) or a EOF token is found.
 '''
 from Token import Token
 
@@ -33,18 +33,21 @@ class Scanner:
     #return type, lexeme, position
 
     def update_info(self, space=False):
-        if not(space):
-            self.lexeme+=self.user_input[0]
-        else:
-            self.position[1]+=len(self.lexeme)
+        if self.user_input != '~':
+            if not(space):
+                self.lexeme+=self.user_input[0]
+            else:
+                #print("space found, adding to position")
+                self.position[1]+=1
 
-
-        if (self.user_input):
             self.user_input = self.user_input[1:]
             self.current_char = ord(self.user_input[0])
             self.position[2]+=1
         else:
-            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+            #print("~ found, curent user_input: ", self.user_input)
+            self.current_char = 126
+            #return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        #print("info updated, curent user_input: ", self.user_input)
 
     #start of every new scan
     def s0(self):
@@ -65,12 +68,12 @@ class Scanner:
             self.identifier = 0
             return(self.s1())
         elif self.current_char == 59 or self.current_char ==46:
-            self.update_info()
             return(self.s3())
         elif 42<=self.current_char<=43 or self.current_char == 45\
                 or self.current_char == 61:
-            self.update_info()
             return(self.s4())
+        elif self.current_char == 126:
+            return (-1)
         else:
             self.update_info(True)
             return(-1)
@@ -94,18 +97,22 @@ class Scanner:
             return(self.s2())
         else:
             self.update_info()
+            #print("end case for ids incoming")
             if self.lexeme.lower() in self.keywords:
                 return(Token('Key', self.lexeme, self.position[0:2]))
             return(Token('ID', self.lexeme, self.position[0:2]))
 
     #method for punctuation
     def s3(self):
+        #print(self.current_char)
         if self.current_char == 59:
             self.update_info()
+            #print(";")
             self.identifier = 2
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
         else:
             self.update_info()
+            #print(".")
             self.identifier = 3
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
 

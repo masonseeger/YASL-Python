@@ -13,9 +13,11 @@ from Token import Token
 def main():
     line = 1
     pos = 0
+    ct = 0
+    print("taking input")
     user_input = input()
     SC = Scanner(user_input + '~', line)
-
+    print("new scanner made with input: " + user_input)
     while True:
         if SC.state == -1:
             break
@@ -24,19 +26,25 @@ def main():
 
         while(SC.state>=0):
             if SC.user_input == '~':
+                #print("line ended...")
                 break
             print(token.information())
+            #print("token printed, updated user_input: " + SC.user_input)
             pos = len(token.lexeme)
             token = SC.next()
 
+        print(token.information())
         line +=1
         user_input = input()
-        SC = Scanner(user_input, line)
+        SC = Scanner(user_input  + '~', line)
 
     print("EOF")
 
 if __name__ == '__main__':
     main()
-
-#make something in the while for NL character
-#think about making a dict or hashmap for the whole returning things in Scanner
+'''
+some characters are sticking together at the end of lines
+ie 43err should be 43, err; right now it is coming out as 43e, rr
+this happens with almost everything, I need to make sure things are not
+added when they are not the same type
+'''
