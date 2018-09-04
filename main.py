@@ -43,8 +43,10 @@ def main():
 if __name__ == '__main__':
     main()
 '''
-some characters are sticking together at the end of lines
-ie 43err should be 43, err; right now it is coming out as 43e, rr
-this happens with almost everything, I need to make sure things are not
-added when they are not the same type
+Literally just needs the EOF indicator and some print statement work.
+Make sure to look at the test cases and see where the EOF is in his
+I dont want there to be EOF in the middle of a line
+Comments.... fuck
+make state for comments /* so we know when we find one
+also errors and stuffs
 '''

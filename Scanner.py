@@ -12,10 +12,10 @@ class Scanner:
         self.user_input = user_input
         self.state = 0
         self.identifier = -1
-        self.position = [line,0,0] #line, start pos of current lexem, current pos
+        self.position = [line,1,1] #line, start pos of current lexem, current pos
         self.current_char = ord(self.user_input[0])
         self.lexeme = ''
-        self.keywords = ['program', 'val', 'begin', 'print', 'end', 'div', 'mod']
+        self.keywords = ['program', 'val', 'begin', 'print', 'end', 'div', 'mod', 'const']
         self.id = ['NUM', 'ID', 'SEMI', 'PERIOD','STAR','PLUS','MINUS','ASSIGN']
         if self.user_input == 'exit()':
             self.state = -1
@@ -86,7 +86,7 @@ class Scanner:
             self.update_info()
             return(self.s1())
         else:
-            self.update_info()
+            #self.update_info()
             return(Token(self.id[self.identifier],self.lexeme, self.position[0:2]))
 
     #method for IDs
@@ -96,7 +96,7 @@ class Scanner:
             self.update_info()
             return(self.s2())
         else:
-            self.update_info()
+            #self.update_info()
             #print("end case for ids incoming")
             if self.lexeme.lower() in self.keywords:
                 return(Token('Key', self.lexeme, self.position[0:2]))
