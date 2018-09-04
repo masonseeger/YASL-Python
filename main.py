@@ -47,4 +47,5 @@ some characters are sticking together at the end of lines
 ie 43err should be 43, err; right now it is coming out as 43e, rr
 this happens with almost everything, I need to make sure things are not
 added when they are not the same type
+You probably just need to take out the updates just before any returns...
 '''
