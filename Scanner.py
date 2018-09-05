@@ -8,9 +8,9 @@ Scanner class takes in line(s) of strings and returns tokens until the string is
 from Token import Token
 
 class Scanner:
-    def __init__(self, user_input, line):
+    def __init__(self, user_input, line, state=0):
         self.user_input = user_input
-        self.state = 0
+        self.state = state
         self.identifier = -1
         self.position = [line,1,1] #line, start pos of current lexem, current pos
         self.current_char = ord(self.user_input[0])
@@ -28,7 +28,7 @@ class Scanner:
         self.identifier=-1
         if next_token:
             return next_token
-        else:
+        elif next_token ==-1:
             self.state = -1
     #return type, lexeme, position
 
@@ -44,14 +44,23 @@ class Scanner:
             self.current_char = ord(self.user_input[0])
             self.position[2]+=1
         else:
-            #print("~ found, curent user_input: ", self.user_input)
             self.current_char = 126
-            #return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
-        #print("info updated, curent user_input: ", self.user_input)
 
     #start of every new scan
     def s0(self):
-        if 90>=self.current_char>=65 or 97<=self.current_char<=122:
+        if(self.current_char==24):
+            self.state = -10
+            return(Token('EOF', ' ', self.position[0:2]))
+        elif self.state == -3:
+            if self.current_char == 42:
+                self.update_info()
+                return(self.s6())
+            elif self.current_char == 126:
+                return (-1)
+            else:
+                self.update_info()
+                return(self.s0())
+        elif 90>=self.current_char>=65 or 97<=self.current_char<=122:
             self.update_info()
             self.identifier = 1
             return(self.s2())
@@ -62,7 +71,8 @@ class Scanner:
             self.update_info()
             self.identifier = 0
             self.position[1]+=len(self.lexeme)
-            return(Token(self.id[self.identifier], '0', self.position[0:2]))
+            return(Token(self.id[self.identifier], '0', self.position[0:2],
+                         defined = False))
         elif 49<=self.current_char<=57:
             self.update_info()
             self.identifier = 0
@@ -72,6 +82,10 @@ class Scanner:
         elif 42<=self.current_char<=43 or self.current_char == 45\
                 or self.current_char == 61:
             return(self.s4())
+        elif self.current_char == 47:
+            #print("found a /")
+            self.update_info()
+            return(self.s5())
         elif self.current_char == 126:
             return (-1)
         else:
@@ -87,7 +101,8 @@ class Scanner:
             return(self.s1())
         else:
             #self.update_info()
-            return(Token(self.id[self.identifier],self.lexeme, self.position[0:2]))
+            return(Token(self.id[self.identifier],self.lexeme, self.position[0:2],
+                         defined = False))
 
     #method for IDs
     def s2(self):
@@ -99,8 +114,8 @@ class Scanner:
             #self.update_info()
             #print("end case for ids incoming")
             if self.lexeme.lower() in self.keywords:
-                return(Token('Key', self.lexeme, self.position[0:2]))
-            return(Token('ID', self.lexeme, self.position[0:2]))
+                return(Token(self.lexeme, self.lexeme, self.position[0:2]))
+            return(Token('ID', self.lexeme, self.position[0:2], defined = False))
 
     #method for punctuation
     def s3(self):
@@ -135,8 +150,32 @@ class Scanner:
             self.identifier = 7
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
 
-    #method for comments
+    #method for comments and beginning block comments
     def s5(self):
+        if self.current_char == 47:
+            self.state = -2
+        elif self.current_char == 42:
+            self.state = -3
+        else:
+            self.state = 0
+            return(self.s7())
+            #return(-1)
         #until you see the ending or a NL char, keep going
         #comments will end tokens
-        return(Token(1,1,[1]))
+        return(-2)
+
+    #for ending comments
+    def s6(self):
+        if self.current_char == 47:
+            self.state = 2
+            print(self.user_input)
+            self.update_info()
+            return(-2)
+        else:
+            self.update_info()
+            return(self.s0())
+        #if self.current_char ==47:
+
+    def s7(self):
+        print("error: unnacceptable character " + chr(self.current_char) + " found in sequence.")
+        return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))

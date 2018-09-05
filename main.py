@@ -17,36 +17,58 @@ def main():
     print("taking input")
     user_input = input()
     SC = Scanner(user_input + '~', line)
-    print("new scanner made with input: " + user_input)
+    #print("new scanner made with input: " + user_input)
     while True:
-        if SC.state == -1:
+        if SC.state == -10:
             break
 
-        token = SC.next()
-
-        while(SC.state>=0):
+        while(SC.state ==-3):
             if SC.user_input == '~':
-                #print("line ended...")
                 break
-            print(token.information())
-            #print("token printed, updated user_input: " + SC.user_input)
-            pos = len(token.lexeme)
+            #print("no end block found")
             token = SC.next()
 
-        print(token.information())
+
+        token = SC.next()
+        if SC.state == -10:
+            break
+        #make all of these state loops their own thing at some point to clean
+        #up the code
+        while(SC.state==0):
+            if SC.user_input == '~':
+                break
+            print(token.information())
+            token = SC.next()
+
+        if 2>SC.state>=-1:
+            print(token.information())
+        if SC.state==2:
+
+            SC.state = 0
+            #token = SC.next()
+            while(SC.state==0):
+                print(token)
+                print(SC.user_input)
+                if SC.user_input == '~':
+                    break
+                print(token.information())
+                token = SC.next()
+            if 2>SC.state>=-1:
+                print(token.information())
+
         line +=1
         user_input = input()
-        SC = Scanner(user_input  + '~', line)
+        if SC.state == -3:
+            SC = Scanner(user_input +'~', line, -3)
+        else:
+            SC = Scanner(user_input  + '~', line)
 
-    print("EOF")
+    print(token.information())
 
 if __name__ == '__main__':
     main()
 '''
-Literally just needs the EOF indicator and some print statement work.
-Make sure to look at the test cases and see where the EOF is in his
-I dont want there to be EOF in the middle of a line
-Comments.... fuck
-make state for comments /* so we know when we find one
-also errors and stuffs
+errors and the block comment are still acting weird
+there are also just a few random errors.... probs having to do with me
+returning ints and such
 '''
