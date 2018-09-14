@@ -49,54 +49,49 @@ class Scanner:
 
     #start of every new scan
     def s0(self):
-        if(self.current_char==24):
+        if (self.current_char == 26):
+            if(self.state==-3):
+                print("error, no */ found before EOF")
             self.state = -10
-            return(Token('EOF', ' ', self.position[0:2]))
-        elif self.state == -3:
-            if self.current_char == 125:
-                self.state = 2
+
+        elif self.state == -3: #comment state
+            if self.current_char == 42: # *
                 self.update_info()
-                self.position[1]+=len(self.lexeme)
-                self.lexeme=''
-                return(self.s0())
-            elif self.current_char == 126:
+                return(self.s6())
+            elif self.current_char == 126: # ~
                 return (-1)
             else:
                 self.update_info()
                 return(self.s0())
-        elif 90>=self.current_char>=65 or 97<=self.current_char<=122:
+        elif 90>=self.current_char>=65 or 97<=self.current_char<=122: # A-Z, a-z
             self.update_info()
             self.identifier = 1
             return(self.s2())
-        elif self.current_char == 32:
+        elif self.current_char == 32: # space
             self.update_info(True)
             return(self.s0())
-        elif self.current_char ==48:
+        elif self.current_char ==48: # 0
             self.update_info()
             self.identifier = 0
             self.position[1]+=len(self.lexeme)
             return(Token(self.id[self.identifier], '0', self.position[0:2],
                          defined = False))
-        elif 49<=self.current_char<=57:
+        elif 49<=self.current_char<=57: #1-9
             self.update_info()
             self.identifier = 0
             return(self.s1())
-        elif self.current_char == 59 or self.current_char ==46:
+        elif self.current_char == 59 or self.current_char ==46: # ;, .
             return(self.s3())
         elif 42<=self.current_char<=43 or self.current_char == 45\
-                or self.current_char == 61:
+                or self.current_char == 61: # operators
             return(self.s4())
-        elif self.current_char == 47:
+        elif self.current_char == 47: #/
             self.update_info()
             return(self.s5())
-        elif self.current_char==123:
-            self.state = -3
-            self.update_info()
-            return(self.s6())
-        elif self.current_char == 126:
+        elif self.current_char == 126: # ~
             return (-1)
-        else:
-            #self.update_info(True)
+        else: # error state
+            self.update_info(True)
             return(self.s7())
 
     #method for numbers
@@ -115,8 +110,8 @@ class Scanner:
             or 97<=self.current_char<=122:
             self.update_info()
             return(self.s2())
-        else:
-            if self.lexeme.lower() in self.keywords:
+        else: # keyword
+            if self.lexeme in self.keywords:
                 return(Token(self.lexeme, self.lexeme, self.position[0:2]))
             return(Token('ID', self.lexeme, self.position[0:2], defined = False))
 
@@ -152,9 +147,9 @@ class Scanner:
 
     #method for comments and beginning block comments
     def s5(self):
-        if self.current_char == 47:
+        if self.current_char == 47: #/
             self.state = -2
-        elif self.current_char == 42:
+        elif self.current_char == 42: #*
             self.state = -3
             self.update_info()
             return(self.s0())
@@ -168,8 +163,8 @@ class Scanner:
 
     #for ending comments
     def s6(self):
-        if self.current_char == 125:
-            self.state = 0
+        if self.current_char == 47:
+            self.state = 2
             self.update_info()
             self.position[1]+=len(self.lexeme)
             self.lexeme=''
@@ -182,5 +177,5 @@ class Scanner:
     #error state
     def s7(self):
         print("error: unnacceptable character found in sequence.")
-        print(self.user_input)
+        #print(self.user_input)
         return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
