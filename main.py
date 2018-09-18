@@ -10,13 +10,22 @@ Using Windows ctrl+z gives end of file
 '''
 from Scanner import Scanner
 from Token import Token
+from Parser import Parser
 
+def endComment(SC, token):
+    if (SC.state == 2):
+        print(token.information())
+
+def eofFound(SC):
+    if(SC.state==-10):
+        return(-1)
 
 def main():
     line = 1
     pos = 0
     ct = 0
     eof = 0
+    parser = Parser()
     SC = Scanner(" ", 0)
     print("taking input")
     try:
@@ -25,37 +34,36 @@ def main():
     #print("new scanner made with input: " + user_input)
 
         while True:
-            if SC.state == -10:
+            if eofFound(SC):
                 break
 
             while(SC.state ==-3):
                 if SC.user_input == '~':
                     break
                 token = SC.next()
-
-
-            if SC.state ==2:
-                print(token.information())
+                endComment(SC, token)
 
             token = SC.next()
 
-            if SC.state ==2:
-                print(token.information())
+            endComment(SC, token)
 
-            if SC.state == -10:
+            if eofFound(SC):
                 break
             #make all of these state loops their own thing at some point to clean
             #up the code
+
             while(SC.state==0):
                 if SC.user_input == '~':
                     break
+                parser.S(token)
                 print(token.information())
                 token = SC.next()
 
             if 2>SC.state>-1:
+                parser.S(token)
                 print(token.information())
 
-            if SC.state == -10:
+            if eofFound(SC):
                 break
 
             line +=1
@@ -66,7 +74,6 @@ def main():
             else:
                 SC = Scanner(user_input  + '~', line)
 
-            #print(token.information())
     except EOFError:
             eof = Token('EOF', ' ', [line, 1])
 
@@ -77,10 +84,11 @@ def main():
     else: #EOF found in the middle of a line
         print(Token('EOF', ' ', SC.position[0:2]).information())
 
+    print(parser.consts)
+
 if __name__ == '__main__':
     main()
 '''
 for now everything looks good. Code could be cleaned and optimized a bit though
-need to fix the comments to /**/usage and give error if eof happens while they
-are in use
+
 '''
