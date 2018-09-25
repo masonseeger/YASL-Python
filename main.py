@@ -12,13 +12,28 @@ from Scanner import Scanner
 from Token import Token
 from Parser import Parser
 
-def endComment(SC, token):
+def checkEOComment(SC, token):
     if (SC.state == 2):
         print(token.information())
 
 def eofFound(SC):
     if(SC.state==-10):
         return(-1)
+
+def commentState(SC, token):
+    while(SC.state ==-3):
+        if SC.user_input == '~':
+            break
+        token = SC.next()
+        checkEOComment(SC, token)
+
+def tokenLoop(SC, token, parser):
+    while(SC.state==0):
+        if SC.user_input == '~':
+            break
+        parser.S(token)
+        print(token.information())
+        token = SC.next()
 
 def main():
     line = 1
@@ -37,15 +52,11 @@ def main():
             if eofFound(SC):
                 break
 
-            while(SC.state ==-3):
-                if SC.user_input == '~':
-                    break
-                token = SC.next()
-                endComment(SC, token)
+            if SC.state == -3:
+                commentState(SC, token)
 
             token = SC.next()
-
-            endComment(SC, token)
+            checkEOComment(SC, token)
 
             if eofFound(SC):
                 break
@@ -56,12 +67,19 @@ def main():
                 if SC.user_input == '~':
                     break
                 parser.S(token)
-                print(token.information())
+                if not(parser.ok):
+                    break
+                #print(token.information())
                 token = SC.next()
 
+            if not(parser.ok):
+                break
             if 2>SC.state>-1:
                 parser.S(token)
-                print(token.information())
+                #print(token.information())
+
+            if not(parser.ok):
+                break
 
             if eofFound(SC):
                 break
@@ -81,6 +99,9 @@ def main():
         if(SC.state ==-3):
             print("error, no */ found before EOF")
         print(eof.information())
+    elif not(parser.ok):
+        print("error in the parser, currently an undefined identifier")
+        print("ending the program   ")
     else: #EOF found in the middle of a line
         print(Token('EOF', ' ', SC.position[0:2]).information())
 
@@ -89,6 +110,8 @@ def main():
 if __name__ == '__main__':
     main()
 '''
-for now everything looks good. Code could be cleaned and optimized a bit though
+Still should clean code more
+Should be ready for project #2
+PLUS MINUS STAR etc need to print the characters, not the words...
 
 '''
