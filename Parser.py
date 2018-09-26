@@ -18,8 +18,9 @@ class Parser:
         self.states = ["prog", "block", "constdecls", "constdecl", "stmts", \
                        "stmt", "expr", "term", "factor"] #list of all states
         self.p0 = ['PRINT']
-        self.p1 = ['PLUS', 'MINUS']
-        self.p2 = ['STAR', 'DIV', 'MOD']
+        self.p1 = ['PLUS', 'MINUS', '+', '-']
+        self.p2 = ['STAR', 'DIV', 'MOD', '*']
+        self.inputChars = ['STAR', 'PLUS', 'MINUS']
         self.accepts = ['PROGRAM'] #determines what states can follow
         self.currentState = "PROG"
         self.ok = 1
@@ -39,6 +40,10 @@ class Parser:
         '''
         if (self.inStmt):
             if (token.type == "SEMI"):
+                self.inStmt = False
+                while bool(self.stack):
+                    print(self.stack.pop())
+            elif token.type == "END":
                 self.inStmt = False
                 while bool(self.stack):
                     print(self.stack.pop())
@@ -75,12 +80,22 @@ class Parser:
         elif tt in self.p1:
             while self.stack[-1] in self.p1 or self.stack[-1] in self.p2:
                 print(self.stack.pop())
-            self.stack.append(tt)
+            self.fixPrint(token)
         elif tt in self.p2:
             if self.stack[-1] in self.p2:
                 print(self.stack.pop())
-            self.stack.append(tt)
+            self.fixPrint(token)
 
+    def fixPrint(self, token):
+        tt = token.type
+        if tt == 'PLUS':
+            self.stack.append('+')
+        elif tt == 'STAR':
+            self.stack.append('*')
+        elif tt == 'MINUS':
+            self.stack.append('-')
+        else:
+            self.stack.append(tt)
 
     #checks to see if a stmt is starting
     def StmtStart(self, token):
