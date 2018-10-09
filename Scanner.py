@@ -15,8 +15,14 @@ class Scanner:
         self.position = [line,1,1] #line, start pos of current lexem, current pos
         self.current_char = ord(self.user_input[0])
         self.lexeme = ''
-        self.keywords = ['program', 'val', 'begin', 'print', 'end', 'div', 'mod', 'const']
-        self.id = ['NUM', 'ID', 'SEMI', 'PERIOD','STAR','PLUS','MINUS','ASSIGN', 'ERROR']
+        self.keywords = ['program', 'val', 'begin', 'print', 'end', 'div', 'mod',\
+                        'const', 'var', 'int', 'bool', 'void', 'fun', 'let', 'if',\
+                        'then', 'else', 'while', 'do', 'input', 'and', 'or',\
+                        'not', 'true', 'false']
+        self.id = ['NUM', 'ID', 'SEMI', 'PERIOD','STAR','PLUS','MINUS',\
+                  'COLON', 'LPAREN', 'RPAREN', 'COMMA', 'ERROR']
+        self.ops = ['ASSIGN','EQUAL', 'NOTEQUAL', 'LESSEQUAL', 'GREATEREQUAL', \
+        'LESS', 'GREATER']
 
     #Returns the next token in the sequence
     def next(self):
@@ -82,12 +88,33 @@ class Scanner:
             return(self.s1())
         elif self.current_char == 59 or self.current_char ==46: # ;, .
             return(self.s3())
-        elif 42<=self.current_char<=43 or self.current_char == 45\
-                or self.current_char == 61: # operators
+        elif 42<=self.current_char<=43 or self.current_char == 45: # operators
             return(self.s4())
         elif self.current_char == 47: #/
             self.update_info()
             return(self.s5())
+        elif self.current_char == 60 or self.current_char == 61 or\
+                self.current_char == 62: #/<, =, >
+            return(self.s_operators())
+        elif self.current_char == 44:#,
+            self.update_info()
+            self.identifier = 10
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 40:#(
+            self.update_info()
+            self.identifier = 8
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 41:#)
+            self.update_info()
+            self.identifier = 9
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 58:#:
+            self.update_info()
+            self.identifier = 7
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 34:#"
+            self.update_info()
+            return(self.s_string())
         elif self.current_char == 126: # ~
             return (-1)
         else: # error state
@@ -126,7 +153,7 @@ class Scanner:
             self.identifier = 3
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
 
-    #method for operator
+    #method for computational operators
     def s4(self):
         if self.current_char == 42:
             self.update_info()
@@ -136,13 +163,9 @@ class Scanner:
             self.update_info()
             self.identifier = 5
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
-        elif self.current_char == 45:
-            self.update_info()
-            self.identifier = 6
-            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
         else:
             self.update_info()
-            self.identifier = 7
+            self.identifier = 6
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
 
     #method for comments and beginning block comments
@@ -172,8 +195,56 @@ class Scanner:
         else:
             self.update_info()
             return(self.s0())
-        #if self.current_char ==47:
 
+    #for determining equality operators
+    def s_operators(self):
+        if self.current_char == 61:#=
+            self.update_info()
+            if self.current_char == 61:
+                self.update_info()
+                self.identifier = 1
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+            else:
+                self.identifier = 0
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 60:#<
+            self.update_info()
+            if self.current_char == 62:#not
+                self.update_info()
+                self.identifier = 2
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+            elif self.current_char == 61:#leq
+                self.update_info()
+                self.identifier = 3
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+            else:#less
+                self.identifier = 5
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+        else:#>
+            self.update_info()
+            if self.current_char == 61:#geq
+                self.update_info()
+                self.identifier = 4
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+            else:#greater
+                self.identifier = 6
+                return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
+
+    #for
+    def s_string(self):
+        if self.current_char == 34:#"
+            self.update_info()
+            if self.current_char == 34:
+                self.update_info()
+                return(self.s_string())
+            else:
+                return(Token('STRING', self.lexeme, self.position[0:2], defined = False))
+        elif self.current_char==126:
+            print("error, \" unmatched")
+            return(Token('STRING', self.lexeme, self.position[0:2], defined = False))
+        else:
+            self.update_info()
+            return(self.s_string())
     #error state
     def s7(self):
         print("error: unnacceptable character found in sequence.")

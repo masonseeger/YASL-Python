@@ -27,14 +27,6 @@ def commentState(SC, token):
         token = SC.next()
         checkEOComment(SC, token)
 
-def tokenLoop(SC, token, parser):
-    while(SC.state==0):
-        if SC.user_input == '~':
-            break
-        parser.S(token)
-        print(token.information())
-        token = SC.next()
-
 def main():
     line = 1
     pos = 0
@@ -64,19 +56,11 @@ def main():
             #up the code
 
             while(SC.state==0):
-                if SC.user_input == '~':
-                    break
-                parser.S(token)
+                #parser.S(token)
                 if not(parser.ok):
                     break
-                #print(token.information())
+                print(token.information())
                 token = SC.next()
-
-            if not(parser.ok):
-                break
-            if 2>SC.state>-1:
-                parser.S(token)
-                #print(token.information())
 
             if not(parser.ok):
                 break
