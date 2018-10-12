@@ -10,12 +10,12 @@ from Scanner import Scanner
 from Token import Token
 
 class Parser:
-    def __init__(self):
+    def __init__(self, scanner):
         self.consts = {}
         self.stack = []
         self.state = 0
         self.id = ''
-        self.states = ["prog", "block", "constdecls", "constdecl", "stmts", \
+        self.states = ["program", "block", "valdecls", "valdecl", "sign", "stmts", \
                        "stmt", "expr", "term", "factor"] #list of all states
         self.p0 = ['PRINT']
         self.p1 = ['PLUS', 'MINUS', '+', '-']
@@ -25,6 +25,7 @@ class Parser:
         self.currentState = "PROG"
         self.ok = 1
         self.inStmt = False
+        self.scanner = scanner
 
     #beginning of the language, only accepts program or errors out
     #currently only uses the postfix() and StmtStart() methods
@@ -145,7 +146,7 @@ class Parser:
             self.id = token.lexeme
 
     # accepts PROGRAM ID SEMI <BLOCK> PERIOD Sequence
-    def Prog(self, token):
+    def Program(self, token):
         if token.type == 'PROGRAM':
             self.accepts = ['ID']
         elif token.type == 'ID':
@@ -171,18 +172,18 @@ class Parser:
             self.accepts = ['PERIOD']
 
     # accepts <ConstDecl> <ConstDecls> Sequence
-    def ConstDecls(self, token):
+    def ValDecls(self, token):
         tt = token.type
-        if tt == 'CONST':
+        if tt == 'VAL':
             self.accepts = ['ID']
         elif tt == 'BEGIN':
             self.accepts = ['PRINT']
             self.currentState = 'STMT'
 
     # accepts CONST ID ASSIGN NUM SEMI Sequence
-    def ConstDecl(self, token):
+    def ValDecl(self, token):
         tt = token.type
-        if tt == 'CONST':
+        if tt == 'VAL':
             self.accepts = ['ID']
         elif tt == 'ID':
             self.accepts = ['ASSIGN']
@@ -192,6 +193,40 @@ class Parser:
             self.accepts = ['CONST', 'BEGIN']
             self.currentState = 'CONSTDECLS'
 
+    def Sign(self, token):
+        tt = token.type
+        if tt == 'MINUS':
+            self.accepts = ['NUM']
+            self.currentState = 'ValDecl'
+
+    def VarDecls(self, token):
+        tt = token.type
+        if tt == 'VAL':
+            self.accepts = ['ID']
+            self.currentState = 'VARDECL'
+        elif tt == 'BEGIN':
+            self.accepts = ['PRINT']
+            self.currentState = 'STMT'
+
+    # accepts CONST ID ASSIGN NUM SEMI Sequence
+    def VarDecl(self, token):
+        tt = token.type
+        if tt == 'VAR':
+            self.accepts = ['ID']
+        elif tt == 'ID':
+            self.accepts = ['ASSIGN']
+        elif tt == 'ASSIGN':
+            self.accepts = ['INT', 'BOOL', 'VOID']
+            self.currentState = 'TYPE'
+        elif tt == 'SEMI':
+            self.accepts = ['CONST', 'BEGIN']
+            self.currentState = 'VARDECLS'
+
+    def Type(self, token):
+        tt = token.type
+        if tt == 'INT' or tt == 'BOOL' or tt == 'VOID':
+            self.accepts = ['SEMI']
+            self.currentState = 'VARDECL'
     # accepts <Stmt> SEMI <Stmt> or <Stmt> Sequences
     def Stmts(self, token):
         tt = token.type
@@ -201,6 +236,18 @@ class Parser:
         elif tt == 'END':
             self.accepts = ['PERIOD']
             self.currentState = 'PROG'
+
+    def FunDecls():
+        tt = token.type
+
+    def FunDecl():
+        tt = token.type
+    def ParamList():
+        tt = token.type
+    def Params():
+        tt = token.type
+    def Param():
+        tt = token.type
 
     # accepts PRINT <Expr> Sequence
     # This and its FOLLOW will be printed in postfix

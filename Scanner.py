@@ -8,7 +8,7 @@ Scanner class takes in line(s) of strings and returns tokens until the string is
 from Token import Token
 
 class Scanner:
-    def __init__(self, user_input, line, state=0):
+    def __init__(self, user_input, line=1, state=0):
         self.user_input = user_input
         self.state = state
         self.identifier = -1
@@ -24,24 +24,46 @@ class Scanner:
         self.ops = ['ASSIGN','EQUAL', 'NOTEQUAL', 'LESSEQUAL', 'GREATEREQUAL', \
         'LESS', 'GREATER']
 
-    #Returns the next token in the sequence
+    def getNextLine(self):
+        self.position = [self.position[0]+1,1,1]
+        #print(self.position)
+        user_input = input()
+        self.user_input = user_input +'~'
+        self.current_char = ord(self.user_input[0])
+
+    #Returns the next token in the sequence and handles the input for new lines
     def next(self):
         next_token = self.s0()
         self.position[1]+=len(self.lexeme)
         self.lexeme = ''
         self.identifier=-1
-
-        if self.state==-3:
-            self.state = -3
-        elif next_token ==-1:
-            self.state =-1
-        else:
-            return next_token
+        print(next_token)
+        if self.state == -2: #comment of type //
+            self.state = 0
+            self.getNextLine()
+            return(self.next())
+        elif self.state==-3: #comment of type /*
+            if next_token == -1: #end of line found
+                self.state = -3
+                self.getNextLine()
+                return(self.next())
+            else: #comment state in the middle of a line
+                self.state = -3
+                print("in comment state")
+                return(self.next())
+        elif next_token ==-1: #EOL found
+            self.getNextLine()
+            return(self.next())
+        elif self.state == -10: #ctrl+Z found (EOF)
+            print(" ")
+        else: #token found outside of comments, needs to be returned
+            print(next_token.information())
+            return(next_token)
 
     #return type, lexeme, position
 
     def update_info(self, space=False):
-        if self.user_input != '~':
+        if self.user_input != '~': #if not EOL
             if not(space):
                 self.lexeme+=self.user_input[0]
             else:
@@ -55,12 +77,16 @@ class Scanner:
 
     #start of every new scan
     def s0(self):
-        if (self.current_char == 26):
-            if(self.state==-3):
+        if (self.current_char == 26): #EOF (ctrl+Z)
+            if(self.state==-3): #in comment state
                 print("error, no */ found before EOF")
-            self.state = -10
-
-        elif self.state == -3: #comment state
+                print(Token('EOF', ' ', self.position[0:2]).information())
+                self.state = -10
+            else:
+                self.update_info()
+                self.state = -10
+                print(Token('EOF', ' ', self.position[0:2]).information())
+        elif self.state == -3: #in comment state
             if self.current_char == 42: # *
                 self.update_info()
                 return(self.s6())
@@ -179,14 +205,13 @@ class Scanner:
         else:
             self.state = 0
             return(self.s7())
-            #return(-1)
         #until you see the ending or a NL char, keep going
         #comments will end tokens
         return(-2)
 
-    #for ending comments
+    #for ending comments, updates state so that it will print the next token
     def s6(self):
-        if self.current_char == 47:
+        if self.current_char == 47:#/
             self.state = 2
             self.update_info()
             self.position[1]+=len(self.lexeme)
@@ -230,12 +255,12 @@ class Scanner:
                 self.identifier = 6
                 return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
 
-    #for
+    #for defining strings 
     def s_string(self):
         if self.current_char == 34:#"
             self.update_info()
             if self.current_char == 34:
-                self.update_info()
+                self.update_info(True)
                 return(self.s_string())
             else:
                 return(Token('STRING', self.lexeme, self.position[0:2], defined = False))

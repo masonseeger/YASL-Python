@@ -28,38 +28,19 @@ def commentState(SC, token):
         checkEOComment(SC, token)
 
 def main():
-    line = 1
-    pos = 0
-    ct = 0
     eof = 0
-    parser = Parser()
-    SC = Scanner(" ", 0)
-    print("taking input")
+    SC = Scanner(" ")
+    parser = Parser(SC)
     try:
         user_input = input()
-        SC = Scanner(user_input + '~', line)
-    #print("new scanner made with input: " + user_input)
+        SC = Scanner(user_input + '~')
+        parser = Parser(SC)
 
         while True:
-            if eofFound(SC):
-                break
-
-            if SC.state == -3:
-                commentState(SC, token)
-
-            token = SC.next()
-            checkEOComment(SC, token)
-
-            if eofFound(SC):
-                break
-            #make all of these state loops their own thing at some point to clean
-            #up the code
-
             while(SC.state==0):
                 #parser.S(token)
                 if not(parser.ok):
                     break
-                print(token.information())
                 token = SC.next()
 
             if not(parser.ok):
@@ -68,34 +49,24 @@ def main():
             if eofFound(SC):
                 break
 
-            line +=1
-            SC.position = [line,1,1]
-            user_input = input()
-            if SC.state == -3:
-                SC = Scanner(user_input +'~', line, -3)
-            else:
-                SC = Scanner(user_input  + '~', line)
-
     except EOFError:
-            eof = Token('EOF', ' ', [line, 1])
+            eof = Token('EOF', ' ', [SC.position[0],1])
 
     if eof: #EOF found as the first thing in a line
+        print("in eof")
         if(SC.state ==-3):
             print("error, no */ found before EOF")
         print(eof.information())
     elif not(parser.ok):
         print("error in the parser, currently an undefined identifier")
         print("ending the program   ")
-    else: #EOF found in the middle of a line
-        print(Token('EOF', ' ', SC.position[0:2]).information())
 
-    print(parser.consts)
+    #print(parser.consts)
 
 if __name__ == '__main__':
     main()
 '''
-Still should clean code more
-Should be ready for project #2
-PLUS MINUS STAR etc need to print the characters, not the words...
-
+Need to find a way to recursively call a function and give it input.
+ - Making the scanner take care of getting the input as well. problem solved
+ - parser will just need to have its own scanner obj
 '''
