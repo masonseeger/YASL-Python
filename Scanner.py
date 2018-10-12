@@ -141,7 +141,7 @@ class Scanner:
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
         elif self.current_char == 34:#"
             self.update_info()
-            return(self.s_string())
+            return(self.sString())
         elif self.current_char == 126: # ~
             return (-1)
         else: # error state
@@ -273,12 +273,12 @@ class Scanner:
                 return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
 
     #for defining strings
-    def s_string(self):
+    def sString(self):
         if self.current_char == 34:#"
             self.update_info()
             if self.current_char == 34:
                 self.update_info(True)
-                return(self.s_string())
+                return(self.sString())
             else:
                 return(Token('STRING', self.lexeme, self.position[0:2], defined = False))
         elif self.current_char==126:
@@ -286,7 +286,7 @@ class Scanner:
             return(Token('STRING', self.lexeme, self.position[0:2], defined = False))
         else:
             self.update_info()
-            return(self.s_string())
+            return(self.sString())
     #error state
     def sError(self):
         print("error: unnacceptable character found in sequence.")
