@@ -21,6 +21,7 @@ class Scanner:
                         'not', 'true', 'false']
         self.id = ['NUM', 'ID', 'SEMI', 'PERIOD','STAR','PLUS','MINUS',\
                   'COLON', 'LPAREN', 'RPAREN', 'COMMA', 'ERROR']
+        self.punctChar = [59, 44, 40, 41, 58, 46]
         self.ops = ['ASSIGN','EQUAL', 'NOTEQUAL', 'LESSEQUAL', 'GREATEREQUAL', \
         'LESS', 'GREATER']
 
@@ -33,7 +34,7 @@ class Scanner:
 
     #Returns the next token in the sequence and handles the input for new lines
     def next(self):
-        next_token = self.s0()
+        next_token = self.S()
         self.position[1]+=len(self.lexeme)
         self.lexeme = ''
         self.identifier=-1
@@ -76,7 +77,7 @@ class Scanner:
             self.current_char = 126
 
     #start of every new scan
-    def s0(self):
+    def S(self):
         if (self.current_char == 26): #EOF (ctrl+Z)
             if(self.state==-3): #in comment state
                 print("error, no */ found before EOF")
@@ -89,19 +90,19 @@ class Scanner:
         elif self.state == -3: #in comment state
             if self.current_char == 42: # *
                 self.update_info()
-                return(self.s6())
+                return(self.sEndComment())
             elif self.current_char == 126: # ~
                 return (-1)
             else:
                 self.update_info()
-                return(self.s0())
+                return(self.S())
         elif 90>=self.current_char>=65 or 97<=self.current_char<=122: # A-Z, a-z
             self.update_info()
             self.identifier = 1
-            return(self.s2())
+            return(self.sID())
         elif self.current_char == 32: # space
             self.update_info(True)
-            return(self.s0())
+            return(self.S())
         elif self.current_char ==48: # 0
             self.update_info()
             self.identifier = 0
@@ -111,14 +112,14 @@ class Scanner:
         elif 49<=self.current_char<=57: #1-9
             self.update_info()
             self.identifier = 0
-            return(self.s1())
-        elif self.current_char == 59 or self.current_char ==46: # ;, .
-            return(self.s3())
+            return(self.sNum())
+        elif self.current_char in self.punctChar: # ;, ., :, (, ), or ,
+            return(self.sPunctuation())
         elif 42<=self.current_char<=43 or self.current_char == 45: # operators
-            return(self.s4())
+            return(self.sComputationalOpp())
         elif self.current_char == 47: #/
             self.update_info()
-            return(self.s5())
+            return(self.sComment())
         elif self.current_char == 60 or self.current_char == 61 or\
                 self.current_char == 62: #/<, =, >
             return(self.s_operators())
@@ -145,34 +146,50 @@ class Scanner:
             return (-1)
         else: # error state
             self.update_info(True)
-            return(self.s7())
+            return(self.sError())
 
     #method for numbers
-    def s1(self):
+    def sNum(self):
         if 48<=self.current_char<=57:
             self.update_info()
-            return(self.s1())
+            return(self.sNum())
         else:
             #self.update_info()
             return(Token(self.id[self.identifier],self.lexeme, self.position[0:2],
                          defined = False))
 
     #method for IDs
-    def s2(self):
+    def sID(self):
         if 48<=self.current_char<=57 or 90>=self.current_char>=65\
             or 97<=self.current_char<=122:
             self.update_info()
-            return(self.s2())
+            return(self.sID())
         else: # keyword
             if self.lexeme in self.keywords:
                 return(Token(self.lexeme, self.lexeme, self.position[0:2]))
             return(Token('ID', self.lexeme, self.position[0:2], defined = False))
 
     #method for punctuation
-    def s3(self):
+    def sPunctuation(self):
         if self.current_char == 59:
             self.update_info()
             self.identifier = 2
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 44:#,
+            self.update_info()
+            self.identifier = 10
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 40:#(
+            self.update_info()
+            self.identifier = 8
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 41:#)
+            self.update_info()
+            self.identifier = 9
+            return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
+        elif self.current_char == 58:#:
+            self.update_info()
+            self.identifier = 7
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
         else:
             self.update_info()
@@ -180,7 +197,7 @@ class Scanner:
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
 
     #method for computational operators
-    def s4(self):
+    def sComputationalOpp(self):
         if self.current_char == 42:
             self.update_info()
             self.identifier = 4
@@ -195,31 +212,31 @@ class Scanner:
             return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
 
     #method for comments and beginning block comments
-    def s5(self):
+    def sComment(self):
         if self.current_char == 47: #/
             self.state = -2
         elif self.current_char == 42: #*
             self.state = -3
             self.update_info()
-            return(self.s0())
+            return(self.S())
         else:
             self.state = 0
-            return(self.s7())
+            return(self.sError())
         #until you see the ending or a NL char, keep going
         #comments will end tokens
         return(-2)
 
     #for ending comments, updates state so that it will print the next token
-    def s6(self):
+    def sEndComment(self):
         if self.current_char == 47:#/
             self.state = 2
             self.update_info()
             self.position[1]+=len(self.lexeme)
             self.lexeme=''
-            return(self.s0())
+            return(self.S())
         else:
             self.update_info()
-            return(self.s0())
+            return(self.S())
 
     #for determining equality operators
     def s_operators(self):
@@ -255,7 +272,7 @@ class Scanner:
                 self.identifier = 6
                 return(Token(self.ops[self.identifier], self.lexeme, self.position[0:2]))
 
-    #for defining strings 
+    #for defining strings
     def s_string(self):
         if self.current_char == 34:#"
             self.update_info()
@@ -271,7 +288,7 @@ class Scanner:
             self.update_info()
             return(self.s_string())
     #error state
-    def s7(self):
+    def sError(self):
         print("error: unnacceptable character found in sequence.")
         #print(self.user_input)
         return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
