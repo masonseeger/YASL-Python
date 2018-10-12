@@ -38,16 +38,20 @@ class Scanner:
         self.position[1]+=len(self.lexeme)
         self.lexeme = ''
         self.identifier=-1
-        print(next_token)
         if self.state == -2: #comment of type //
-            self.state = 0
-            self.getNextLine()
-            return(self.next())
-        elif self.state==-3: #comment of type /*
+            if next_token == -1: #end of line found
+                self.state = 0
+                self.getNextLine()
+                return(self.next())
+            else:
+                return(self.next())
+        elif self.state==-3: #comment of type /**/
             if next_token == -1: #end of line found
                 self.state = -3
                 self.getNextLine()
                 return(self.next())
+            elif self.state == -10: #ctrl+Z found (EOF)
+                return(-10)
             else: #comment state in the middle of a line
                 self.state = -3
                 print("in comment state")
@@ -56,9 +60,9 @@ class Scanner:
             self.getNextLine()
             return(self.next())
         elif self.state == -10: #ctrl+Z found (EOF)
-            print(" ")
+            return(-10)
         else: #token found outside of comments, needs to be returned
-            print(next_token.information())
+            #print(next_token.information())
             return(next_token)
 
     #return type, lexeme, position
@@ -78,15 +82,17 @@ class Scanner:
 
     #start of every new scan
     def S(self):
-        if (self.current_char == 26): #EOF (ctrl+Z)
-            if(self.state==-3): #in comment state
+        if self.current_char == 26: #EOF (ctrl+Z)
+            if self.state==-3: #in comment state
                 print("error, no */ found before EOF")
                 print(Token('EOF', ' ', self.position[0:2]).information())
                 self.state = -10
+                return(Token('EOF', self.lexeme, self.position[0:2]).information())
             else:
                 self.update_info()
                 self.state = -10
                 print(Token('EOF', ' ', self.position[0:2]).information())
+                return(Token('EOF', self.lexeme, self.position[0:2]).information())
         elif self.state == -3: #in comment state
             if self.current_char == 42: # *
                 self.update_info()
@@ -215,9 +221,11 @@ class Scanner:
     def sComment(self):
         if self.current_char == 47: #/
             self.state = -2
+            self.update_info()
         elif self.current_char == 42: #*
             self.state = -3
             self.update_info()
+            print("starting new comment")
             return(self.S())
         else:
             self.state = 0
@@ -235,7 +243,7 @@ class Scanner:
             self.lexeme=''
             return(self.S())
         else:
-            self.update_info()
+            #self.update_info()
             return(self.S())
 
     #for determining equality operators
@@ -280,7 +288,7 @@ class Scanner:
                 self.update_info(True)
                 return(self.sString())
             else:
-                return(Token('STRING', self.lexeme, self.position[0:2], defined = False))
+                return(Token('STRING', self.lexeme[1:-1], self.position[0:2], defined = False))
         elif self.current_char==126:
             print("error, \" unmatched")
             return(Token('STRING', self.lexeme, self.position[0:2], defined = False))

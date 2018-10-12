@@ -37,17 +37,11 @@ def main():
         parser = Parser(SC)
 
         while True:
-            while(SC.state==0):
-                #parser.S(token)
-                if not(parser.ok):
-                    break
-                token = SC.next()
-
-            if not(parser.ok):
-                break
-
+            token = SC.next()
             if eofFound(SC):
                 break
+            print(token.information())
+            #parser.S(token)
 
     except EOFError:
             eof = Token('EOF', ' ', [SC.position[0],1])
