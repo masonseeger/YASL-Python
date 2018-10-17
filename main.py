@@ -12,20 +12,9 @@ from Scanner import Scanner
 from Token import Token
 from Parser import Parser
 
-def checkEOComment(SC, token):
-    if (SC.state == 2):
-        print(token.information())
-
 def eofFound(SC):
     if(SC.state==-10):
         return(-1)
-
-def commentState(SC, token):
-    while(SC.state ==-3):
-        if SC.user_input == '~':
-            break
-        token = SC.next()
-        checkEOComment(SC, token)
 
 def main():
     eof = 0
@@ -59,8 +48,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''
-Need to find a way to recursively call a function and give it input.
- - Making the scanner take care of getting the input as well. problem solved
- - parser will just need to have its own scanner obj
-'''

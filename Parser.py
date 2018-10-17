@@ -104,34 +104,12 @@ class Parser:
             self.inStmt = True
             self.stack.append(token.type)
 
-    #uses the parsers state to move into what current position its at
-    def findPos(self, token):
-        cs = self.currentState
-        if (cs == 'PROG'):
-            self.Prog(token)
-        elif(cs == "BLOCK"):
-            self.Block(token)
-        elif(cs == "CONSTDECLS"):
-            self.ConstDecls(token)
-        elif(cs == "CONSTDECL"):
-            self.ConstDecl(token)
-        elif(cs == "STMTS"):
-            self.Stmts(token)
-        elif(cs == "STMT"):
-            self.Stmt(token)
-        elif(cs == "EXPR"):
-            self.Expr(token)
-        elif(cs == "TERM"):
-            self.Term(token)
-        elif(cs == "FACTOR"):
-            self.Factor(token)
-
     # determins if the current token is accepted by the grammar
-    def match(self, token):
-        if not(token.type in self.accepts):
+    def match(self, type):
+        if not(self.token.type == type):
             print(token.type)
             print(self.accepts)
-            self.ok = 0
+            self.ok = -1
 
     # used to store a const or val when declared
     def store(self, token):
@@ -146,133 +124,88 @@ class Parser:
             self.id = token.lexeme
 
     # accepts PROGRAM ID SEMI <BLOCK> PERIOD Sequence
-    def Program(self, token):
-        if token.type == 'PROGRAM':
-            self.accepts = ['ID']
-        elif token.type == 'ID':
-            self.accepts = ['SEMI']
-        elif token.type == ['SEMI']:
-            print('found semi in prog')
-            self.currentState = 'BLOCK'
-            self.accepts = ['CONST', 'BEGIN']
-        elif token.type == 'PERIOD':
-            self.ok = 2
-            print("end of program.")
-
+    def parseProgram(self, token):
+        return(1)
     # accepts <ConstDecls> BEGIN <Stmts> END Sequence
-    def Block(self, token):
-        tt = token.type
-        if tt == 'CONST':
-            self.accepts = 'ID'
-            self.currentState = 'CONSTDECL'
-        elif tt == 'BEGIN':
-            self.accepts = ['PRINT']
-        elif tt == 'END':
-            self.currentState = 'PROG'
-            self.accepts = ['PERIOD']
-
+    def parseBlock(self, token):
+        return(1)
     # accepts <ConstDecl> <ConstDecls> Sequence
-    def ValDecls(self, token):
-        tt = token.type
-        if tt == 'VAL':
-            self.accepts = ['ID']
-        elif tt == 'BEGIN':
-            self.accepts = ['PRINT']
-            self.currentState = 'STMT'
-
+    def parseValDecls(self, token):
+        return(1)
     # accepts CONST ID ASSIGN NUM SEMI Sequence
-    def ValDecl(self, token):
-        tt = token.type
-        if tt == 'VAL':
-            self.accepts = ['ID']
-        elif tt == 'ID':
-            self.accepts = ['ASSIGN']
-        elif tt == 'ASSIGN':
-            self.accepts = ['NUM']
-        elif tt == 'SEMI':
-            self.accepts = ['CONST', 'BEGIN']
-            self.currentState = 'CONSTDECLS'
-
-    def Sign(self, token):
-        tt = token.type
-        if tt == 'MINUS':
-            self.accepts = ['NUM']
-            self.currentState = 'ValDecl'
-
-    def VarDecls(self, token):
-        tt = token.type
-        if tt == 'VAL':
-            self.accepts = ['ID']
-            self.currentState = 'VARDECL'
-        elif tt == 'BEGIN':
-            self.accepts = ['PRINT']
-            self.currentState = 'STMT'
-
+    def parseValDecl(self, token):
+        return(1)
+    def parseSign(self, token):
+        return(1)
+    def parseVarDecls(self, token):
+        return(1)
     # accepts CONST ID ASSIGN NUM SEMI Sequence
-    def VarDecl(self, token):
-        tt = token.type
-        if tt == 'VAR':
-            self.accepts = ['ID']
-        elif tt == 'ID':
-            self.accepts = ['ASSIGN']
-        elif tt == 'ASSIGN':
-            self.accepts = ['INT', 'BOOL', 'VOID']
-            self.currentState = 'TYPE'
-        elif tt == 'SEMI':
-            self.accepts = ['CONST', 'BEGIN']
-            self.currentState = 'VARDECLS'
-
-    def Type(self, token):
-        tt = token.type
-        if tt == 'INT' or tt == 'BOOL' or tt == 'VOID':
-            self.accepts = ['SEMI']
-            self.currentState = 'VARDECL'
-    # accepts <Stmt> SEMI <Stmt> or <Stmt> Sequences
-    def Stmts(self, token):
-        tt = token.type
-        if tt == 'PRINT':
-            self.accepts = ['NUM', 'ID']
-            self.currentState = 'STMT'
-        elif tt == 'END':
-            self.accepts = ['PERIOD']
-            self.currentState = 'PROG'
-
-    def FunDecls():
-        tt = token.type
-
-    def FunDecl():
-        tt = token.type
-    def ParamList():
-        tt = token.type
-    def Params():
-        tt = token.type
-    def Param():
-        tt = token.type
-
-    # accepts PRINT <Expr> Sequence
-    # This and its FOLLOW will be printed in postfix
-    def Stmt(self, token):
-        tt = token.type
-        if tt == 'NUM' or tt == 'ID':
-            self.accepts = ['PLUS', 'MINUS', 'STAR', 'DIV', 'MOD', 'SEMI']
-        elif tt in ['PLUS', 'MINUS', 'STAR', 'DIV', 'MOD']:
-            self.accepts == ['ID', 'NUM']
-        elif tt == 'SEMI':
-            self.accepts = ['PRINT', 'END']
-            self.currentState = 'STMTS'
-
-    # accepts <Expr> PLUS <Term> or <Expr> MINUS <Term> or <Term>
-    def Expr(self, token):
-        tt = token.type
+    def parseVarDecl(self, token):
         return(1)
 
+    def parseType(self, token):
+        return(1)
+
+    def parseFunDecls():
+        return(1)
+
+    def parseFunDecl():
+        return(1)
+
+    def parseParamList():
+        return(1)
+
+    def parseParams():
+        return(1)
+
+    def parseParam():
+        return(1)
+
+    def parseStmtList():
+        return(1)
+
+    def parseStmts(self, token):
+        return(1)
+
+    def parseStmt(self, token):
+        return(1)
+
+    def parseItems():
+        return(1)
+    def parseItem():
+        return(1)
+    # accepts <Expr> PLUS <Term> or <Expr> MINUS <Term> or <Term>
+    def parseExpr(self, token):
+        return(1)
+    def parseRelOp():
+        return(1)
+    def parseSimpleExpr():
+        return(1)
+    def parseAddOp():
+        return(1)
     # accepts <Term> STAR <Factor> or <Term> DIV <Factor> or <Term> MOD <Factor>
     # or <Factor>
     def Term(self, token):
-        tt = token.type
         return(1)
-
+    def parseMulOp():
+        return(1)
     #accepts NUM or ID
     def Factor(self, token):
-        tt = token.type
+        '''if (check(num)):
+                Oldtoken = match(Num)
+                return(num(oldtoken.lexeme))
+            elif(check(id)):
+                ot = match(id)
+                return(id(ot.lexeme))
+            elif(check(LPar)):
+                match(LPar)
+                expr = parseExpr()
+                match(RPar)
+                return(expr)
+                '''
+    def parseUnOp():
+        return(1)
+    def parseArgList():
+        return(1)
+    def parseArgs():
         return(1)
