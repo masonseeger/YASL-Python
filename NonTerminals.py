@@ -19,19 +19,16 @@ class Program:
         self.block.display(indent+1)
 
 class Block:
-    def __init__(self, s, vs = None, rs = None, fs = None):
+    def __init__(self, s, vs, rs, fs):
         self.valdecls = vs
         self.vardecls = rs
         self.fundecls = fs
         self.stmt = s
     def display(self, indent):
         print(indent*' ' + "Block")
-        if self.valdecls.list:
-            self.valdecls.display(indent+1)
-        if self.vardecls.list:
-            self.vardecls.display(indent+1)
-        if self.fundecls.list:
-            self.fundecls.display(indent+1)
+        self.valdecls.display(indent+1)
+        self.vardecls.display(indent+1)
+        self.fundecls.display(indent+1)
         self.stmt.display(indent+1)
 
 class ValDecl:
@@ -49,7 +46,7 @@ class VarDecl:
         print(indent*' ' + 'Var ' + self.id + ' : ' + self.type)
 
 class FunDecl:
-    def __init__(self, id, t, ps, b):
+    def __init__(self, id, t, b, ps):
         self.id = id
         self.type = t
         self.paramList = ps
@@ -71,7 +68,7 @@ class Assign:
         self.id = id
         self.expr = expr
     def display(self, indent):
-        print(indent*' ' + 'Assign ' + id)
+        print(indent*' ' + 'Assign ' + self.id)
         self.expr.display(indent+1)
         #what??? look into this above and fix it somehow
 class Sequence:
@@ -79,7 +76,7 @@ class Sequence:
         self.stmtList = ss
     def display(self, indent):
         print(indent*' ' + 'Sequence')
-        for i in self.stmtList:
+        for i in self.stmtList.list:
             i.display(indent+1)
 
 class IfThen:
@@ -88,7 +85,7 @@ class IfThen:
         self.s1 = stmt
     def display(self, indent):
         print(indent*' ' + 'IfThen')
-        self.expr.display(indent+1)
+        self.test.display(indent+1)
         self.s1.display(indent+1)
 
 class IfThenElse:
@@ -98,7 +95,7 @@ class IfThenElse:
         self.s2 = stmt2
     def display(self, indent):
         print(indent*' ' + 'IfThenElse')
-        self.expr.display(indent+1)
+        self.test.display(indent+1)
         self.s1.display(indent+1)
         self.s2.display(indent+1)
 
@@ -116,7 +113,7 @@ class Print:
         self.its = items
     def display(self, indent):
         print(indent*' ' + 'Print')
-        for itm in self.its:
+        for itm in self.its.list:
             itm.display(indent + 1)
 
 class ExprStmt:
@@ -166,11 +163,11 @@ class Term:
         self.term = term
     def display(self, indent):
         if self.op == None:
-            self.term.display(indent)
+            self.factor.display(indent)
         else:
             self.op.display(indent)
+            self.factor.display(indent+1)
             self.term.display(indent+1)
-            self.right.display(indent+1)
 
 class UnOp:
     def __init__(self, unop, factor):
@@ -189,8 +186,8 @@ class Call:
         self.args.display(indent)
 
 class StmtList:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, stmt):
         self.list.append(stmt)
@@ -200,8 +197,8 @@ class StmtList:
             stmt.display(indent + 1)
 
 class ItemList:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, item):
         self.list.append(item)
@@ -211,8 +208,8 @@ class ItemList:
             item.display(indent + 1)
 
 class ArgList:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, arg):
         self.list.append(arg)
@@ -222,8 +219,8 @@ class ArgList:
             arg.display(indent + 1)
 
 class ParamList:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, param):
         self.list.append(param)
@@ -233,8 +230,8 @@ class ParamList:
             param.display(indent + 1)
 
 class VarDecls:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, vardecl):
         self.list.append(vardecl)
@@ -244,8 +241,8 @@ class VarDecls:
             var.display(indent + 1)
 
 class ValDecls:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, valdecl):
         self.list.append(valdecl)
@@ -255,13 +252,12 @@ class ValDecls:
             val.display(indent + 1)
 
 class FunDecls:
-    def __init__(self, list = []):
-        self.list = list
+    def __init__(self):
+        self.list = []
 
     def add(self, fundecl):
         self.list.append(fundecl)
 
     def display(self, indent):
         for fun in self.list:
-            input()
             fun.display(indent + 1)

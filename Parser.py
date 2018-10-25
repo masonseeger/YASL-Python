@@ -18,23 +18,23 @@ class Parser:
         self.state = 0
         self.id = ''
         self.states = ["program", "block", "valdecls", "valdecl", "sign", "stmts", \
-                       "stmt", "expr", "term", "factor"] #list of all states
+                       "stmt", "expr", "term", "factor"]  # list of all states
         self.p0 = ['PRINT']
         self.p1 = ['PLUS', 'MINUS', '+', '-']
         self.p2 = ['STAR', 'DIV', 'MOD', '*']
         self.inputChars = ['STAR', 'PLUS', 'MINUS']
-        self.accepts = ['PROGRAM'] #determines what states can follow
+        self.accepts = ['PROGRAM']  # determines what states can follow
         self.currentState = "PROG"
         self.ok = 1
         self.inStmt = False
         self.scanner = scanner
         self.token = self.scanner.next()
 
-    #beginning of the language, only accepts program or errors out
-    #currently only uses the postfix() and StmtStart() methods
-    #right now it will store const and vals in a dictionary
-    #and print Stmts in postfix as described in class
-    #checks for undeclared identifiers only
+    # beginning of the language, only accepts program or errors out
+    # currently only uses the postfix() and StmtStart() methods
+    # right now it will store const and vals in a dictionary
+    # and print Stmts in postfix as described in class
+    # checks for undeclared identifiers only
     def S(self):
         #print(self.match([self.token.type]))
         program = self.parseProgram()
@@ -141,16 +141,20 @@ class Parser:
             name = self.match(['ID'])
             self.match(['SEMI'])
             #print('finding a block')
-            block = self.parseBlock()
-            return(Program(name, block))
+            print("START PROGRAM BLOCK")
+            sblock = self.parseBlock()
+            print('program block', sblock)
+            return(Program(name, sblock))
     # accepts <ConstDecls> BEGIN <Stmts> END Sequence
     def parseBlock(self):
         print('finding valdecls')
         vals = self.parseValDecls()
         print('finding vardecls')
         vars = self.parseVarDecls()
-        print('finding fundecls')
+        print('START FUNDECLS')
         funs = self.parseFunDecls()
+        for i in funs.list:
+            print('block function', i.id, i)
         print('finding stmt')
         stmt = self.parseStmt()
         return(Block(stmt, vals, vars, funs))
@@ -159,16 +163,7 @@ class Parser:
         print('In parseValDecls')
         valdecls = ValDecls()
         while self.check(['VAL']):
-            self.match(['VAL'])
-            id = self.match(['ID'])
-            self.match(['ASSIGN'])
-            if self.check(['MINUS']):
-                self.match(['MINUS'])
-                num = -(int(self.match(['NUM'])))
-            elif self.check(['NUM']):
-                num = self.match(['NUM'])
-            self.match(['SEMI'])
-            valdecls.add(ValDecl(id, num))
+            valdecls.add(self.parseValDecl())
         return(valdecls)
     # accepts CONST ID ASSIGN NUM SEMI Sequence
 
@@ -179,7 +174,7 @@ class Parser:
         self.match(['ASSIGN'])
         if self.check(['MINUS']):
             self.match(['MINUS'])
-            num = -int(self.match(['NUM']))
+            num = -(int(self.match(['NUM'])))
         elif self.check(['NUM']):
             num = self.match(['NUM'])
         self.match(['SEMI'])
@@ -189,12 +184,7 @@ class Parser:
         print('In parseVarDecls')
         vardecls = VarDecls()
         while self.check(['VAR']):
-            self.match(['VAR'])
-            id = self.match(['ID'])
-            self.match(['COLON'])
-            type = self.match(['INT', 'BOOL', 'VOID'])
-            self.match(['SEMI'])
-            vardecls.add(VarDecl(id, type))
+            vardecls.add(self.parseVarDecl())
         return(vardecls)
     # accepts CONST ID ASSIGN NUM SEMI Sequence
     def parseVarDecl(self):
@@ -209,19 +199,9 @@ class Parser:
     def parseFunDecls(self):
         print('In parseFunDecls')
         fundecls = FunDecls()
+        print(fundecls)
         while self.check(['FUN']):
-            self.match(['FUN'])
-            id = self.match(['ID'])
-            self.match(['LPAREN'])
-            paramlist = self.parseParamList()
-            self.match(['RPAREN'])
-            self.match(['COLON'])
-            type = self.match(['INT', 'BOOL', 'VOID'])
-            self.match(['SEMI'])
-            print("block in fundecls")
-            block = self.parseBlock()
-            self.match(['SEMI'])
-            fundecls.add(FunDecl(id, type, paramlist, block))
+            fundecls.add(self.parseFunDecl())
         return(fundecls)
 
     def parseFunDecl(self):
@@ -231,28 +211,23 @@ class Parser:
         self.match(['LPAREN'])
         paramlist = self.parseParamList()
         self.match(['RPAREN'])
+        self.match(['COLON'])
         type = self.match(['INT', 'BOOL', 'VOID'])
         self.match(['SEMI'])
-        block = self.parseBlock()
+        fblock = self.parseBlock()
+        print('function block', id, fblock)
+        print("  ", fblock.fundecls)
         self.match(['SEMI'])
-        return(FunDecl(id, type, paramlist, block))
+        return(FunDecl(id, type, fblock, paramlist))
 
     def parseParamList(self):
         print('In parseParamList')
         paramlist = ParamList()
         while self.check(['ID']):
-            id = self.match(['ID'])
-            self.match(['COLON'])
-            type = self.match(['INT', 'BOOL', 'VOID'])
-            paramlist.add(Param(id, type))
-            if not(self.check(['COMMA'])):
-                break
-            else:
+            paramlist.add(self.parseParam())
+            if self.check(['COMMA']):
                 self.match(['COMMA'])
         return(paramlist)
-
-    def parseParams(self):
-        return(1)
 
     def parseParam(self):
         print('In parseParam')
@@ -267,57 +242,11 @@ class Parser:
         accepts = ['LET', 'BEGIN', 'IF', 'WHILE', 'INPUT', 'PRINT', 'STRING',\
                    'NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
         while self.check(accepts):
-            if self.check(['LET']):
-                self.match(['LET'])
-                id = self.match(['ID'])
-                self.match(['ASSIGN'])
-                expr = self.parseExpr()
-                stmtlist.add(Assign(id, expr))
-            elif self.check(['BEGIN']):
-                self.match(['BEGIN'])
-                stmtlist = self.parseStmtList()
-                self.match(['END'])
-                stmtlist.add(Sequence(stmtlist))
-            elif self.check(['IF']):
-                self.match(['IF'])
-                test = self.parseExpr()
-                self.match(['THEN'])
-                stmt1 = self.parseStmt()
-                if self.check(['ELSE']):
-                    self.match(['ELSE'])
-                    stmt2 = self.parseStmt()
-                    stmtlist.add(IfThenElse(test, stmt1, stmt2))
-                else:
-                    stmtlist.add(IfThen(test,stmt1))
-            elif self.check(['WHILE']):
-                self.match('WHILE')
-                test = self.parseExpr()
-                self.match(['DO'])
-                stmt1 = self.parseStmt()
-                stmtlist.add(While(test, stmt1))
-            elif self.check(['INPUT']):
-                self.match(['INPUT'])
-                msg = self.match(['STRING'])
-                if self.check(['COMMA']):
-                    self.match(['COMMA'])
-                    id = self.match(['ID'])
-                    stmtlist.add(Input2(msg, id))
-                else:
-                    stmtlist.add(Input(msg))
-            elif self.check(['PRINT']):
-                self.match(['PRINT'])
-                items = self.parseItems()
-                stmtlist.add(Print(items))
-            else:
-                expr = self.parseExpr()
-                stmtlist.add(ExprStmt(expr))
+            stmtlist.add(self.parseStmt())
 
             if self.check(['SEMI']):
                 self.match(['SEMI'])
         return(stmtlist)
-
-    def parseStmts(self):
-        return(1)
 
     def parseStmt(self):
         print('In parseStmt')
@@ -363,8 +292,7 @@ class Parser:
                     return(Input(msg))
             elif self.check(['PRINT']):
                 self.match(['PRINT'])
-                items = self.parseItems()
-                return(Print(items))
+                return(self.parseItems())
             else:
                 expr = self.parseExpr()
                 return(ExprStmt(expr))
@@ -377,17 +305,11 @@ class Parser:
         itemlist = ItemList()
         accepts = ['STRING','NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
         while self.check(accepts):
-            if self.check(['STRING']):
-                msg = self.match(['STRING'])
-                itemlist.add(StringItem(msg))
-            else:
-                expr = self.parseExpr()
-                itemlist.add(ExprItem(expr))
-
+            itemlist.add(self.parseItem())
             if self.check(['COMMA']):
                 self.match(['COMMA'])
-
-        return(itemlist)
+            else:
+                return(itemlist)
 
     def parseItem(self):
         print('In parseItem')
@@ -406,7 +328,7 @@ class Parser:
         if self.check(relop):
             op = self.match(relop)
             right = self.parseSimpleExpr()
-            return(Expr(left, op, right))
+            return(Expr(left, Op(op), right))
         return(left)
 
     def parseSimpleExpr(self):
@@ -416,7 +338,7 @@ class Parser:
         if self.check(addop):
             op = self.match(addop)
             right = self.parseSimpleExpr()
-            return(SimpleExpr(left, op, right))
+            return(SimpleExpr(left, Op(op), right))
         return(left)
     # accepts <Term> STAR <Factor> or <Term> DIV <Factor> or <Term> MOD <Factor>
     # or <Factor>
@@ -426,7 +348,7 @@ class Parser:
         if self.check(['STAR', 'DIV', 'MOD', 'AND']):
             op = self.match(['STAR', 'DIV', 'MOD', 'AND'])
             right = self.parseTerm()
-            return(Term(left, op, right))
+            return(Term(left, Op(op), right))
         return(left)
 
     def parseFactor(self):

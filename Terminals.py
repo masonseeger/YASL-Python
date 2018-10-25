@@ -48,7 +48,7 @@ class StringItem:
         self.lexeme = lexeme
 
     def display(self, indent):
-        print(indent*' ' + 'STRING ' + self.lexeme)
+        print(indent*' ' + 'StringItem ' + self.lexeme)
 
 class Input:
     def __init__(self, msg):
