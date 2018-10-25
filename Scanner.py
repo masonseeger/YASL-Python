@@ -54,7 +54,7 @@ class Scanner:
                 return(-10)
             else: #comment state in the middle of a line
                 self.state = -3
-                print("in comment state")
+                #print("in comment state")
                 return(self.next())
         elif next_token ==-1: #EOL found
             self.getNextLine()
@@ -225,7 +225,7 @@ class Scanner:
         elif self.current_char == 42: #*
             self.state = -3
             self.update_info()
-            print("starting new comment")
+            #print("starting new comment")
             return(self.S())
         else:
             self.state = 0

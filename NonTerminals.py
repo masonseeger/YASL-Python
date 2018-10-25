@@ -15,20 +15,23 @@ class Program:
         self.name = name
         self.block = b
     def display(self, indent):
-        print(indent + 'Program ' + self.name)
+        print(indent*' ' + 'Program ' + self.name)
         self.block.display(indent+1)
 
 class Block:
-    def __init__(self, vs, rs, fs, s):
+    def __init__(self, s, vs = None, rs = None, fs = None):
         self.valdecls = vs
         self.vardecls = rs
         self.fundecls = fs
         self.stmt = s
     def display(self, indent):
-        print(indent + "block")
-        self.valdecls.display(indent+1)
-        self.vardecls.display(indent+1)
-        self.fundecls.display(indent+1)
+        print(indent*' ' + "Block")
+        if self.valdecls.list:
+            self.valdecls.display(indent+1)
+        if self.vardecls.list:
+            self.vardecls.display(indent+1)
+        if self.fundecls.list:
+            self.fundecls.display(indent+1)
         self.stmt.display(indent+1)
 
 class ValDecl:
@@ -36,14 +39,14 @@ class ValDecl:
         self.id = id
         self.num = n
     def display(self, indent):
-        print(indent + 'Val ' + self.id + ' = ' + self.num)
+        print(indent*' ' + 'Val ' + self.id + ' = ' + str(self.num))
 
 class VarDecl:
     def __init__(self, id, t):
         self.id = id
         self.type = t
     def display(self, indent):
-        print(indent + 'Var ' + self.id + ' : ' + self.type)
+        print(indent*' ' + 'Var ' + self.id + ' : ' + self.type)
 
 class FunDecl:
     def __init__(self, id, t, ps, b):
@@ -52,10 +55,8 @@ class FunDecl:
         self.paramList = ps
         self.block = b
     def display(self, indent):
-        print(indent + 'Fun ' + self.id + ' : '+ self.type)
-        if self.paramList:
-            for i in self.paramList:
-                i.display(indent+1)
+        print(indent*' ' + 'Fun ' + self.id + ' : '+ self.type)
+        self.paramList.display(indent+1)
         self.block.display(indent+1)
 
 class Param:
@@ -63,20 +64,21 @@ class Param:
         self.id = id
         self.type = t
     def display(self, indent):
-        print(indent + 'Val ' + self.id + ' : ' + self.type)
+        print(indent*' ' + 'Val ' + self.id + ' : ' + self.type)
 
 class Assign:
     def __init__(self, id, expr):
         self.id = id
         self.expr = expr
     def display(self, indent):
-        print(indent + 'let ' + self.id + ' = ' + self.expr.binop.toString)
+        print(indent*' ' + 'Assign ' + id)
+        self.expr.display(indent+1)
         #what??? look into this above and fix it somehow
 class Sequence:
     def __init__(self, ss):
         self.stmtList = ss
     def display(self, indent):
-        print(indent + 'Sequence')
+        print(indent*' ' + 'Sequence')
         for i in self.stmtList:
             i.display(indent+1)
 
@@ -85,7 +87,8 @@ class IfThen:
         self.test = expr
         self.s1 = stmt
     def display(self, indent):
-        print(indent + 'if ' + self.test.binop.toString + ' then')
+        print(indent*' ' + 'IfThen')
+        self.expr.display(indent+1)
         self.s1.display(indent+1)
 
 class IfThenElse:
@@ -94,48 +97,96 @@ class IfThenElse:
         self.s1 = stmt1
         self.s2 = stmt2
     def display(self, indent):
-        print(indent + 'if ' + self.test.binop.toString + ' then')
+        print(indent*' ' + 'IfThenElse')
+        self.expr.display(indent+1)
         self.s1.display(indent+1)
+        self.s2.display(indent+1)
 
 class While:
     def __init__(self, expr, stmt):
         self.test = expr
         self.s1 = stmt
     def display(self, indent):
+        print(indent*' ' + 'While')
+        self.test.display(indent+1)
+        self.s1.display(indent+1)
 
 class Print:
     def __init__(self, items):
         self.its = items
     def display(self, indent):
+        print(indent*' ' + 'Print')
+        for itm in self.its:
+            itm.display(indent + 1)
 
 class ExprStmt:
     def __init__(self, expr):
         self.expr = expr
     def display(self, indent):
+        print(indent*' ' + 'ExprStmt')
+        self.expr.display(indent+1)
 
 class ExprItem:
     def __init__(self, expr):
         self.expr = expr
     def display(self, indent):
+        print(indent*' ' + 'ExprItem')
+        self.expr.display(indent+1)
 
-class BinOp:
-    def __init__(self, simpleExL, relop, simpleExR):
+class Expr:
+    def __init__(self, simpleExL, relop = None, simpleExR = None):
         self.left = simpleExL
         self.op = relop
         self.right = simpleExR
     def display(self, indent):
+        if self.op == None:
+            self.left.display(indent)
+        else:
+            self.op.display(indent)
+            self.left.display(indent+1)
+            self.right.display(indent+1)
+
+class SimpleExpr:
+    def __init__(self, term, relop = None, simpleExR = None):
+        self.term = term
+        self.op = relop
+        self.right = simpleExR
+    def display(self, indent):
+        if self.op == None:
+            self.term.display(indent)
+        else:
+            self.op.display(indent)
+            self.term.display(indent+1)
+            self.right.display(indent+1)
+
+class Term:
+    def __init__(self, factor, relop = None, term = None):
+        self.factor = factor
+        self.op = relop
+        self.term = term
+    def display(self, indent):
+        if self.op == None:
+            self.term.display(indent)
+        else:
+            self.op.display(indent)
+            self.term.display(indent+1)
+            self.right.display(indent+1)
 
 class UnOp:
-    def __init__(self, unop, expr):
+    def __init__(self, unop, factor):
         self.unop = unop
-        self.expr = expr
+        self.factor = factor
     def display(self, indent):
+        print(indent*' ' + 'UnOp ' + self.unop)
+        self.factor.display(indent + 1)
 
 class Call:
     def __init__(self, id, arglist):
         self.id = id
-        self.args = argList
+        self.args = arglist
     def display(self, indent):
+        print(indent*' ' + "Call " + self.id)
+        self.args.display(indent)
 
 class StmtList:
     def __init__(self, list = []):
@@ -145,6 +196,19 @@ class StmtList:
         self.list.append(stmt)
 
     def display(self, indent):
+        for stmt in self.list:
+            stmt.display(indent + 1)
+
+class ItemList:
+    def __init__(self, list = []):
+        self.list = list
+
+    def add(self, item):
+        self.list.append(item)
+
+    def display(self, indent):
+        for item in self.list:
+            item.display(indent + 1)
 
 class ArgList:
     def __init__(self, list = []):
@@ -154,6 +218,8 @@ class ArgList:
         self.list.append(arg)
 
     def display(self, indent):
+        for arg in self.list:
+            arg.display(indent + 1)
 
 class ParamList:
     def __init__(self, list = []):
@@ -163,6 +229,8 @@ class ParamList:
         self.list.append(param)
 
     def display(self, indent):
+        for param in self.list:
+            param.display(indent + 1)
 
 class VarDecls:
     def __init__(self, list = []):
@@ -172,6 +240,8 @@ class VarDecls:
         self.list.append(vardecl)
 
     def display(self, indent):
+        for var in self.list:
+            var.display(indent + 1)
 
 class ValDecls:
     def __init__(self, list = []):
@@ -181,6 +251,8 @@ class ValDecls:
         self.list.append(valdecl)
 
     def display(self, indent):
+        for val in self.list:
+            val.display(indent + 1)
 
 class FunDecls:
     def __init__(self, list = []):
@@ -190,7 +262,6 @@ class FunDecls:
         self.list.append(fundecl)
 
     def display(self, indent):
-
-class Expr:
-    def __init__(self, binop):
-        self.binop = binop
+        for fun in self.list:
+            input()
+            fun.display(indent + 1)
