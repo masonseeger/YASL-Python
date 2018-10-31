@@ -141,26 +141,23 @@ class Parser:
             name = self.match(['ID'])
             self.match(['SEMI'])
             #print('finding a block')
-            print("START PROGRAM BLOCK")
+            #print("START PROGRAM BLOCK")
             sblock = self.parseBlock()
-            print('program block', sblock)
+            #print('program block', sblock)
             return(Program(name, sblock))
     # accepts <ConstDecls> BEGIN <Stmts> END Sequence
     def parseBlock(self):
-        print('finding valdecls')
+        #print('finding valdecls')
         vals = self.parseValDecls()
-        print('finding vardecls')
+        #print('finding vardecls')
         vars = self.parseVarDecls()
-        print('START FUNDECLS')
+        #print('START FUNDECLS')
         funs = self.parseFunDecls()
-        for i in funs.list:
-            print('block function', i.id, i)
-        print('finding stmt')
         stmt = self.parseStmt()
         return(Block(stmt, vals, vars, funs))
     # accepts <ConstDecl> <ConstDecls> Sequence
     def parseValDecls(self):
-        print('In parseValDecls')
+        #print('In parseValDecls')
         valdecls = ValDecls()
         while self.check(['VAL']):
             valdecls.add(self.parseValDecl())
@@ -168,7 +165,7 @@ class Parser:
     # accepts CONST ID ASSIGN NUM SEMI Sequence
 
     def parseValDecl(self):
-        print('In parseValDecl')
+        #print('In parseValDecl')
         self.match(['VAL'])
         id = self.match(['ID'])
         self.match(['ASSIGN'])
@@ -181,14 +178,14 @@ class Parser:
         return(ValDecl(id, num))
 
     def parseVarDecls(self):
-        print('In parseVarDecls')
+        #print('In parseVarDecls')
         vardecls = VarDecls()
         while self.check(['VAR']):
             vardecls.add(self.parseVarDecl())
         return(vardecls)
     # accepts CONST ID ASSIGN NUM SEMI Sequence
     def parseVarDecl(self):
-        print('In parseVarDecl')
+        #print('In parseVarDecl')
         self.match(['VAR'])
         id = self.match(['ID'])
         self.match(['COLON'])
@@ -197,15 +194,15 @@ class Parser:
         return(VarDecl(id, type))
 
     def parseFunDecls(self):
-        print('In parseFunDecls')
+        #print('In parseFunDecls')
         fundecls = FunDecls()
-        print(fundecls)
+        #print(fundecls)
         while self.check(['FUN']):
             fundecls.add(self.parseFunDecl())
         return(fundecls)
 
     def parseFunDecl(self):
-        print('In parseFunDecl')
+        #print('In parseFunDecl')
         self.match(['FUN'])
         id = self.match(['ID'])
         self.match(['LPAREN'])
@@ -215,13 +212,13 @@ class Parser:
         type = self.match(['INT', 'BOOL', 'VOID'])
         self.match(['SEMI'])
         fblock = self.parseBlock()
-        print('function block', id, fblock)
-        print("  ", fblock.fundecls)
+        #print('function block', id, fblock)
+        #print("  ", fblock.fundecls)
         self.match(['SEMI'])
         return(FunDecl(id, type, fblock, paramlist))
 
     def parseParamList(self):
-        print('In parseParamList')
+        #print('In parseParamList')
         paramlist = ParamList()
         while self.check(['ID']):
             paramlist.add(self.parseParam())
@@ -230,14 +227,14 @@ class Parser:
         return(paramlist)
 
     def parseParam(self):
-        print('In parseParam')
+        #print('In parseParam')
         id = self.match(['ID'])
         self.match(['COLON'])
         type = self.match(['INT', 'BOOL', 'VOID'])
         return(Param(id, type))
 
     def parseStmtList(self):
-        print('In parseStmtList')
+        #print('In parseStmtList')
         stmtlist = StmtList()
         accepts = ['LET', 'BEGIN', 'IF', 'WHILE', 'INPUT', 'PRINT', 'STRING',\
                    'NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
@@ -249,7 +246,7 @@ class Parser:
         return(stmtlist)
 
     def parseStmt(self):
-        print('In parseStmt')
+        #print('In parseStmt')
         accepts = ['LET', 'BEGIN', 'IF', 'WHILE', 'INPUT', 'PRINT', 'STRING',\
                    'NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
         if self.check(accepts):
@@ -301,7 +298,7 @@ class Parser:
         exit()
 
     def parseItems(self):
-        print('In parseItems')
+        #print('In parseItems')
         itemlist = ItemList()
         accepts = ['STRING','NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
         while self.check(accepts):
@@ -312,7 +309,7 @@ class Parser:
                 return(itemlist)
 
     def parseItem(self):
-        print('In parseItem')
+        #print('In parseItem')
         if self.check(['STRING']):
             msg = self.match(['STRING'])
             return(StringItem(msg))
@@ -321,7 +318,7 @@ class Parser:
             return(ExprItem(expr))
     # accepts <Expr> PLUS <Term> or <Expr> MINUS <Term> or <Term>
     def parseExpr(self):
-        print('In parseExpr')
+        #print('In parseExpr')
         left = self.parseSimpleExpr()
         relop = ['ASSIGN','EQUAL', 'NOTEQUAL', 'LESSEQUAL', 'GREATEREQUAL', \
         'LESS', 'GREATER']
@@ -332,7 +329,7 @@ class Parser:
         return(left)
 
     def parseSimpleExpr(self):
-        print('In parseSimpleExpr')
+        #print('In parseSimpleExpr')
         left = self.parseTerm()
         addop = ['PLUS', 'MINUS', 'OR']
         if self.check(addop):
@@ -343,7 +340,7 @@ class Parser:
     # accepts <Term> STAR <Factor> or <Term> DIV <Factor> or <Term> MOD <Factor>
     # or <Factor>
     def parseTerm(self):
-        print('In parseTerm')
+        #print('In parseTerm')
         left = self.parseFactor()
         if self.check(['STAR', 'DIV', 'MOD', 'AND']):
             op = self.match(['STAR', 'DIV', 'MOD', 'AND'])
@@ -352,7 +349,7 @@ class Parser:
         return(left)
 
     def parseFactor(self):
-        print('In parseFactor')
+        #print('In parseFactor')
         accepts = ['NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
         if self.check(accepts):
             if self.check(['NUM']):
@@ -383,7 +380,7 @@ class Parser:
                 return(expr)
 
     def parseArgList(self):
-        print('In parseArgList')
+        #print('In parseArgList')
         arglist = ArgList()
         accepts = ['NUM', 'ID', 'TRUE', 'FALSE', 'MINUS', 'NOT', 'LPAREN']
         while self.check(accepts):

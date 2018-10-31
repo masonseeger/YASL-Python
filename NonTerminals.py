@@ -29,7 +29,7 @@ class Block:
         self.valdecls.display(indent+1)
         self.vardecls.display(indent+1)
         self.fundecls.display(indent+1)
-        self.stmt.display(indent+1)
+        self.stmt.display(indent+2)
 
 class ValDecl:
     def __init__(self, id, n):
@@ -153,8 +153,9 @@ class SimpleExpr:
             self.term.display(indent)
         else:
             self.op.display(indent)
-            self.term.display(indent+1)
             self.right.display(indent+1)
+            self.term.display(indent+1)
+
 
 class Term:
     def __init__(self, factor, relop = None, term = None):
@@ -168,6 +169,7 @@ class Term:
             self.op.display(indent)
             self.factor.display(indent+1)
             self.term.display(indent+1)
+
 
 class UnOp:
     def __init__(self, unop, factor):
@@ -183,7 +185,7 @@ class Call:
         self.args = arglist
     def display(self, indent):
         print(indent*' ' + "Call " + self.id)
-        self.args.display(indent)
+        self.args.display(indent+1)
 
 class StmtList:
     def __init__(self):
@@ -204,6 +206,7 @@ class ItemList:
         self.list.append(item)
 
     def display(self, indent):
+        print(indent*' ' + 'Print')
         for item in self.list:
             item.display(indent + 1)
 
