@@ -4,8 +4,7 @@ By: Mason Seeger
 
 YASL - Yet Another Simple Language
 
-As of now this program is a lexicon for a simple programming language.
-Need to go back through this and change the prints to print in the ast tree
+Nonterminal grammmar peices from YASL's grammar
 '''
 
 from Terminals import *

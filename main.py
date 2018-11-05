@@ -11,6 +11,7 @@ Using Windows ctrl+z gives end of file
 from Scanner import Scanner
 from Token import Token
 from Parser import Parser
+from Interpreter import Interpreter
 
 def eofFound(SC):
     if(SC.state==-10):
@@ -24,7 +25,12 @@ def main():
         SC = Scanner(user_input + '~')
         parser = Parser(SC)
         program = parser.S()
-        program.display(0)
+        interpreter = Interpreter(program)
+        interpreter.valVarFunFinder()
+        print(interpreter.vars)
+        print(interpreter.vals)
+        print(interpreter.functions)
+        #program.display(0)
 
     except EOFError:
             eof = Token('EOF', ' ', [SC.position[0],1])

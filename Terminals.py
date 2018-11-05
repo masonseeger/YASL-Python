@@ -4,7 +4,7 @@ By: Mason Seeger
 
 YASL - Yet Another Simple Language
 
-As of now this program is a lexicon for a simple programming language.
+Terminal grammmar peices from YASL's grammar
 '''
 
 class Num:

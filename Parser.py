@@ -4,7 +4,7 @@ By: Mason Seeger
 
 This class does two things:
 makes sure that correct grammar is used
-prints expressions in postfix
+stores the program in an ast tree for the interpreter
 '''
 from Scanner import Scanner
 from Token import Token
