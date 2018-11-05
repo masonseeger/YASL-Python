@@ -17,6 +17,8 @@ class Program:
     def display(self, indent):
         print(indent*' ' + 'Program ' + self.name)
         self.block.display(indent+1)
+    def run():
+        print('Running program...')
 
 class Block:
     def __init__(self, s, vs, rs, fs):
@@ -153,9 +155,8 @@ class SimpleExpr:
             self.term.display(indent)
         else:
             self.op.display(indent)
-            self.right.display(indent+1)
             self.term.display(indent+1)
-
+            self.right.display(indent+1)
 
 class Term:
     def __init__(self, factor, relop = None, term = None):
@@ -169,7 +170,6 @@ class Term:
             self.op.display(indent)
             self.factor.display(indent+1)
             self.term.display(indent+1)
-
 
 class UnOp:
     def __init__(self, unop, factor):

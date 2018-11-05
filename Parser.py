@@ -38,73 +38,8 @@ class Parser:
     def S(self):
         #print(self.match([self.token.type]))
         program = self.parseProgram()
-        program.display(0)
-        '''
-        if (self.inStmt):
-            if (token.type == "SEMI"):
-                self.inStmt = False
-                while bool(self.stack):
-                    print(self.stack.pop())
-            elif token.type == "END":
-                self.inStmt = False
-                while bool(self.stack):
-                    print(self.stack.pop())
-            else:
-                self.postfix(token)
-        else:
-            self.StmtStart(token)
-
-        if self.state == 2:
-            if token.type == 'NUM':
-                self.consts[self.id] = token.lexeme
-            self.id = ''
-            self.state = 0
-
-        if token.type == 'ASSIGN':
-            #print("found assign")
-            self.state = 2
-
-        if token.type == 'ID':
-            #print("found ID")
-            self.state = 1
-            self.id = token.lexeme
-    '''
-
-    # this function helps store and print terms in postfix for stmts
-    def postfix(self, token):
-        tt = token.type
-        if tt == 'NUM':
-            print(token.lexeme)
-        elif tt == 'ID':
-            if token.lexeme in self.consts:
-                print(self.consts[token.lexeme])
-            else:
-                self.ok = 0
-        elif tt in self.p1:
-            while self.stack[-1] in self.p1 or self.stack[-1] in self.p2:
-                print(self.stack.pop())
-            self.fixPrint(token)
-        elif tt in self.p2:
-            if self.stack[-1] in self.p2:
-                print(self.stack.pop())
-            self.fixPrint(token)
-
-    def fixPrint(self, token):
-        tt = token.type
-        if tt == 'PLUS':
-            self.stack.append('+')
-        elif tt == 'STAR':
-            self.stack.append('*')
-        elif tt == 'MINUS':
-            self.stack.append('-')
-        else:
-            self.stack.append(tt)
-
-    #checks to see if a stmt is starting
-    def StmtStart(self, token):
-        if (token.type == 'PRINT'):
-            self.inStmt = True
-            self.stack.append(token.type)
+        #program.display(0)
+        return program
 
     # determins if the current token is accepted by the grammar
     def match(self, accepts):

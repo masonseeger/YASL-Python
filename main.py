@@ -23,13 +23,8 @@ def main():
         user_input = input()
         SC = Scanner(user_input + '~')
         parser = Parser(SC)
-        parser.S()
-        #while True:
-            #token = SC.next()
-            #if eofFound(SC):
-            #    break
-            #print(token.information())
-        #parser.S()
+        program = parser.S()
+        program.display(0)
 
     except EOFError:
             eof = Token('EOF', ' ', [SC.position[0],1])
