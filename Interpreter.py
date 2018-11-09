@@ -8,6 +8,7 @@ Interprets the tree from the parser and runs the code
 '''
 from NonTerminals import *
 from Terminals import *
+import copy
 
 class Interpreter:
     def __init__(self, program):
@@ -22,7 +23,7 @@ class Interpreter:
 
     def interpProgram(self):
         print('in interpProgram')
-        st = self.symbolTable
+        st = copy.copy(self.symbolTable)
         st[self.program.name] = self.program.block
         self.interpBlock(st, self.program.block)
         print(st)
@@ -79,7 +80,9 @@ class Interpreter:
             print("While")
             test = self.interpExpr(st, stmt.test)
             while(test):
+                print(st)
                 self.interpStmt(st, stmt.s1)
+                print(self.symbolTable)
                 test = self.interpExpr(st, stmt.test)
         elif type(stmt) == type(Input(0)):
             print("Input")
@@ -160,6 +163,8 @@ class Interpreter:
 
         if type(expr) == type(UnOp(0,0)):
             return self.interpUnOp(st, expr)
+        elif type(expr) == type(ExprStmt(0)):
+            return self.interpExpr(st,expr.expr)
         elif type(expr.left) == type(UnOp(0,0)):
             lhs = self.interpUnOp(st, expr.left)
         else:
@@ -201,6 +206,10 @@ class Interpreter:
 
     def interpRelOp(self, st, lhs, op, rhs):
         print('In interpRelop')
+        if type(lhs) == type(Id(0)):
+            lhs = st[lhs.lexeme]
+        if type(rhs) == type(Id(0)):
+            rhs = st[rhs.lexeme]
         #add code for vals in st
         print(lhs,op.lexeme,rhs)
         if op.lexeme == "==":
