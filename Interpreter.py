@@ -143,72 +143,80 @@ class Interpreter:
             return True
 
         if type(expr.left) == type(UnOp(0,0)):
-            lhs = self.interpUnOP(st, expr.left)
+            lhs = self.interpUnOp(st, expr.left)
         else:
             lhs = self.interpSide(st, expr.left)
 
-        if expr.op == "AND":
+        print("pre lhs" , lhs)
+
+        if expr.op.lexeme == "AND":
             if lhs:
                 return self.interpSide(st, expr.right)
             else:
                 return lhs
-        elif expr.op == "OR":
+        elif expr.op.lexeme == "OR":
             if lhs:
                 return lhs
             else:
                 return self.interpSide(st, expr.right)
-        elif expr.op in ['EQUAL', 'NOTEQUAL', 'LESSEQUAL', 'GREATEREQUAL', \
+        elif expr.op.lexeme in ['EQUAL', 'NOTEQUAL', 'LESSEQUAL', 'GREATEREQUAL', \
                         'LESS', 'GREATER']:
             rhs = self.interpSide(st, expr.right)
             return self.interpRelOp(st, lhs, expr.op, rhs)
-        elif expr.op in ['PLUS', 'MINUS', 'DIV', 'STAR', 'MOD']:
+        elif expr.op.lexeme in ['-', '+', 'DIV', '*', 'MOD']:
             rhs = self.interpSide(st, expr.right)
-            return self.interpMathOp(st, rhs, expr.op, lhs)
+            print("left hand side" , lhs)
+            print("right hand side" , rhs)
+            return self.interpMathOp(st, lhs, expr.op, rhs)
         else:
+            print(expr.op.lexeme)
             print("broken in interpExpr")
 
     def interpSide(self, st,  expr):
         print('In interpSide')
+        print(type(expr))
         #fix this to enter in vars from st
-        if type(expr)==type(bool()) or type(int()):
+        if type(expr)==type(bool()) or type(expr)==type(int()):
             return expr
+        elif type(expr)==type(Id(0)):
+            return st[expr.lexeme]
         else:
             return self.interpExpr(st, expr)
 
     def interpRelOp(self, st, lhs, op, rhs):
         print('In interpRelop')
         #add code for vals in st
-        if op == "EQUAL":
+        if op.lexeme == "EQUAL":
             return lhs == rhs
-        elif op == "NOTEQUAL":
+        elif op.lexeme == "NOTEQUAL":
             return lhs != rhs
-        elif op == "LESSEQUAL":
+        elif op.lexeme == "LESSEQUAL":
             return lhs<=rhs
-        elif op == "LESS":
+        elif op.lexeme == "LESS":
             return lhs<rhs
-        elif op == "GREATEREQUAL":
+        elif op.lexeme == "GREATEREQUAL":
             return lhs>=rhs
-        elif op == "GREATER":
+        elif op.lexeme == "GREATER":
             return lhs>rhs
 
     def interpMathOp(self, st, lhs, op, rhs):
-        print('In interpRelop')
+        print('In interpMathop')
         #add code for st
-        if op == "PLUS":
+        if op.lexeme == "+":
             return lhs + rhs
-        elif op == "MINUS":
+        elif op.lexeme == "-":
             return lhs - rhs
-        elif op == "STAR":
+        elif op.lexeme == "*":
             return lhs*rhs
-        elif op == "DIV":
+        elif op.lexeme == "DIV":
             return lhs/rhs
-        elif op == "MOD":
+        elif op.lexeme == "MOD":
             return lhs%rhs
 
-    def interpUnOp(self, expr):
-        print('In interpFactor')
-        value = self.interpExpr(expr.factor)
+    def interpUnOp(self, st, expr):
+        print('In interpUnop')
+        value = self.interpExpr(st, expr.factor)
         if expr.unop == 'NOT':
             return not(value)
-        elif expr.unop == 'NEG':
+        elif expr.unop == '-':
             return -value
