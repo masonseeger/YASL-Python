@@ -146,29 +146,29 @@ class Expr:
 
 class SimpleExpr:
     def __init__(self, term, relop = None, simpleExR = None):
-        self.term = term
+        self.left = term
         self.op = relop
         self.right = simpleExR
     def display(self, indent):
         if self.op == None:
-            self.term.display(indent)
+            self.left.display(indent)
         else:
             self.op.display(indent)
-            self.term.display(indent+1)
+            self.left.display(indent+1)
             self.right.display(indent+1)
 
 class Term:
     def __init__(self, factor, relop = None, term = None):
-        self.factor = factor
+        self.left = factor
         self.op = relop
-        self.term = term
+        self.right = term
     def display(self, indent):
         if self.op == None:
-            self.factor.display(indent)
+            self.left.display(indent)
         else:
             self.op.display(indent)
-            self.factor.display(indent+1)
-            self.term.display(indent+1)
+            self.left.display(indent+1)
+            self.right.display(indent+1)
 
 class UnOp:
     def __init__(self, unop, factor):

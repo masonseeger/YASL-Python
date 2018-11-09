@@ -30,15 +30,8 @@ class Parser:
         self.scanner = scanner
         self.token = self.scanner.next()
 
-    # beginning of the language, only accepts program or errors out
-    # currently only uses the postfix() and StmtStart() methods
-    # right now it will store const and vals in a dictionary
-    # and print Stmts in postfix as described in class
-    # checks for undeclared identifiers only
     def S(self):
-        #print(self.match([self.token.type]))
         program = self.parseProgram()
-        #program.display(0)
         return program
 
     # determins if the current token is accepted by the grammar
@@ -56,18 +49,6 @@ class Parser:
         if self.token.type in accepts:
             return(True)
         return(False)
-
-    # used to store a const or val when declared
-    def store(self, token):
-        if self.state == 1:
-            if token.type == 'NUM':
-                self.consts[self.id] = token.lexeme
-            self.id = ''
-            self.state = 0
-
-        if token.type == 'ID':
-            self.state = 1
-            self.id = token.lexeme
 
     # accepts PROGRAM ID SEMI <BLOCK> PERIOD Sequence
     def parseProgram(self):

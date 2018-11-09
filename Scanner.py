@@ -8,8 +8,9 @@ Scanner class takes in line(s) of strings and returns tokens until the string is
 from Token import Token
 
 class Scanner:
-    def __init__(self, user_input, line=1, state=0):
-        self.user_input = user_input
+    def __init__(self, user_file, line=1, state=0):
+        self.user_file = user_file
+        self.user_input = self.user_file.readline()
         self.state = state
         self.identifier = -1
         self.position = [line,1,1] #line, start pos of current lexem, current pos
@@ -28,8 +29,8 @@ class Scanner:
     def getNextLine(self):
         self.position = [self.position[0]+1,1,1]
         #print(self.position)
-        user_input = input()
-        self.user_input = user_input +'~'
+        user_input = self.user_file.readline()
+        self.user_input = user_input
         self.current_char = ord(self.user_input[0])
 
     #Returns the next token in the sequence and handles the input for new lines
@@ -68,7 +69,7 @@ class Scanner:
     #return type, lexeme, position
 
     def update_info(self, space=False):
-        if self.user_input != '~': #if not EOL
+        if len(self.user_input) >1: #if not EOL
             if not(space):
                 self.lexeme+=self.user_input[0]
             else:
@@ -78,7 +79,7 @@ class Scanner:
             self.current_char = ord(self.user_input[0])
             self.position[2]+=1
         else:
-            self.current_char = 126
+            self.current_char = 10
 
     #start of every new scan
     def S(self):
@@ -148,7 +149,7 @@ class Scanner:
         elif self.current_char == 34:#"
             self.update_info()
             return(self.sString())
-        elif self.current_char == 126: # ~
+        elif self.current_char == 10: # ~
             return (-1)
         else: # error state
             self.update_info(True)
@@ -298,5 +299,5 @@ class Scanner:
     #error state
     def sError(self):
         print("error: unnacceptable character found in sequence.")
-        #print(self.user_input)
+
         return(Token(self.id[self.identifier], self.lexeme, self.position[0:2]))
