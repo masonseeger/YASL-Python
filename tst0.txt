@@ -39,9 +39,7 @@ program demo3;
   end;
 begin
   input "Enter a number", a;
-  let c2 = 5
-  let c1 = 2
-  //let c2 = bar(a, x <> y);
-  print "The answer is """, c2--z+c1, """!";
+  let c2 = bar(a, x <> y);
+  //print "The answer is """, c2--z+c1, """!";
   input "Hit any key to end"
 end.
